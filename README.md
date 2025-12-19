@@ -24,6 +24,7 @@ Variables utiles :
 - `DATABASE_URL` : `postgresql://...` (par défaut `postgresql://shorten:shorten@db:5432/shorten`).
 - `INACTIVITY_DAYS` : jours d'inactivité avant expiration (défaut 30).
 - `CODE_LENGTH` : longueur du code (défaut 6).
+- Dépendances Python installées au démarrage conteneur (`pip install --no-cache-dir -r requirements.txt`) incluant `psycopg[binary,pool]`.
 
 ## Sans Compose (dev rapide)
 

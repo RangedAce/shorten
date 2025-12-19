@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  app:
+    image: python:3.12-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: >
+      sh -c "pip install --no-cache-dir -r requirements.txt
+      && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    environment:
+      BASE_URL: "https://s.rangedace.fr"   # à adapter au domaine réel
+      DATABASE_URL: "postgresql://shorten:shorten@db:5432/shorten"
+      # INACTIVITY_DAYS: "30"
+      # CODE_LENGTH: "6"
+    volumes:
+      - ./:/app:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shorten
+      POSTGRES_PASSWORD: shorten
+      POSTGRES_DB: shorten
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shorten"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:

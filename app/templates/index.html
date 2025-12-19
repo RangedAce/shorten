@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>s.rangedace.fr – Raccourcisseur d'URL</title>
+    <link rel="stylesheet" href="/static/app.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>Raccourcisseur d'URL</h1>
+      <p class="muted">Colle ton lien, clique, et récupère un URL court valable 30 jours sans utilisation.</p>
+
+      <form id="shorten-form" class="form">
+        <label for="url-input">URL à raccourcir</label>
+        <input
+          id="url-input"
+          name="url"
+          type="text"
+          placeholder="https://example.com/..."
+          required
+          autocomplete="off"
+        />
+        <button id="shorten-btn" type="submit">Raccourcir l'URL</button>
+      </form>
+
+      <section id="result" class="result hidden">
+        <div class="result-row">
+          <div>
+            <div class="label">Lien court</div>
+            <a id="short-url" href="#" target="_blank" rel="noreferrer"></a>
+          </div>
+          <button id="copy-btn" class="secondary" type="button">Copier</button>
+        </div>
+        <div id="meta" class="meta muted"></div>
+      </section>
+
+      <section id="error" class="error hidden"></section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
+

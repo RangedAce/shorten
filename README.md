@@ -9,17 +9,21 @@ Fonctionnalités :
 ## Démarrage avec Docker Compose
 
 ```bash
+# Place ce repo dans /opt/docker/shorten/app sur ta VM
+cd /opt/docker/shorten/app
 docker compose up -d --build
-# Ouvre http://localhost:8000
+# http://localhost:8000 (ou via ton domaine)
 ```
 
-Variables utiles (déjà posées dans `docker-compose.yml`) :
+Volumes/bind mounts (déjà dans `docker-compose.yml`) :
+- Code : `/opt/docker/shorten/app` monté en RO dans le conteneur.
+- Données Postgres : `/opt/docker/shorten/db` persiste la base.
+
+Variables utiles :
 - `BASE_URL` : URL publique utilisée dans les réponses (ex: `https://s.rangedace.fr`).
 - `DATABASE_URL` : `postgresql://...` (par défaut `postgresql://shorten:shorten@db:5432/shorten`).
 - `INACTIVITY_DAYS` : jours d'inactivité avant expiration (défaut 30).
 - `CODE_LENGTH` : longueur du code (défaut 6).
-
-Le volume `pgdata` (défini dans Compose) persiste la base Postgres.
 
 ## Sans Compose (dev rapide)
 

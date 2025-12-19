@@ -14,7 +14,7 @@ services:
       # INACTIVITY_DAYS: "30"
       # CODE_LENGTH: "6"
     volumes:
-      - ./:/app:ro
+      - /opt/docker/shorten/app:/app:ro
     ports:
       - "8000:8000"
     depends_on:
@@ -29,12 +29,11 @@ services:
       POSTGRES_PASSWORD: shorten
       POSTGRES_DB: shorten
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - /opt/docker/shorten/db:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U shorten"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-volumes:
-  pgdata:
+volumes: {}

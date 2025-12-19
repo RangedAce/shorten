@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from __future__ import annotations
-
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Iterator, Optional
@@ -21,18 +19,27 @@ def utcnow() -> datetime:
 class Database:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
-        self.pool = ConnectionPool(settings.database_url, min_size=1, max_size=10, open=True)
+        self.pool = ConnectionPool(
+            settings.database_url,
+            min_size=1,
+            max_size=10,
+            open=True,
+        )
 
     @contextmanager
     def tx(self) -> Iterator:
-        with self.pool.connection() as conn:
-            with conn.cursor(row_factory=dict_row) as cur:
-                try:
-                    yield cur
-                    conn.commit()
-                except Exception:
-                    conn.rollback()
-                    raise
+        with self.pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            try:
+                yield cur
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+
+    @contextmanager
+    def ro_cursor(self) -> Iterator:
+        with self.pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            yield cur
 
     def init_schema(self) -> None:
         with self.tx() as cur:
@@ -66,22 +73,12 @@ class Database:
             return cur.rowcount or 0
 
     def get_active(self, code: str) -> Optional[dict]:
-        with self.pool.connection() as conn:
-            with conn.cursor(row_factory=dict_row) as cur:
-                cur.execute(
-                    "SELECT * FROM links WHERE code = %s AND active = true",
-                    (code,),
-                )
-                return cur.fetchone()
-
-    def is_active_code(self, code: str) -> bool:
-        with self.pool.connection() as conn:
-            with conn.cursor(row_factory=dict_row) as cur:
-                cur.execute(
-                    "SELECT 1 FROM links WHERE code = %s AND active = true",
-                    (code,),
-                )
-                return cur.fetchone() is not None
+        with self.ro_cursor() as cur:
+            cur.execute(
+                "SELECT * FROM links WHERE code = %s AND active = true",
+                (code,),
+            )
+            return cur.fetchone()
 
     def touch(self, code: str) -> None:
         now = utcnow()
@@ -91,26 +88,25 @@ class Database:
                 (now, code),
             )
 
-    def reuse_or_insert(self, code: str, target_url: str) -> None:
+    def upsert_inactive_or_insert(self, code: str, target_url: str) -> bool:
+        """Insert le code ou réactive s'il était inactif. Retourne False si le code actif existe déjà."""
         now = utcnow()
         with self.tx() as cur:
             cur.execute(
                 """
-                UPDATE links
-                SET target_url = %s, created_at = %s, last_access_at = %s, active = true
-                WHERE code = %s AND active = false
-                """,
-                (target_url, now, now, code),
-            )
-            if cur.rowcount:
-                return
-            cur.execute(
-                """
                 INSERT INTO links(code, target_url, created_at, last_access_at, active)
                 VALUES(%s, %s, %s, %s, true)
+                ON CONFLICT (code) DO UPDATE
+                SET target_url = EXCLUDED.target_url,
+                    created_at = EXCLUDED.created_at,
+                    last_access_at = EXCLUDED.last_access_at,
+                    active = true
+                WHERE links.active = false
+                RETURNING code;
                 """,
                 (code, target_url, now, now),
             )
+            return cur.fetchone() is not None
 
     def recycle_one_inactive(self, target_url: str) -> Optional[str]:
         now = utcnow()

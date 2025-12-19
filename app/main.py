@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timedelta, timezone
+from threading import Lock
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, HTTPException, Request
@@ -53,6 +55,23 @@ def short_url_for(request: Request, code: str) -> str:
     return f"{request_base_url(request)}/{code}"
 
 
+EXPIRE_INTERVAL = timedelta(minutes=5)
+_expire_lock = Lock()
+_last_expire_at: datetime | None = None
+UTC = timezone.utc
+
+
+def maybe_expire_inactive() -> None:
+    """Throttle l'expiration pour éviter un UPDATE à chaque requête."""
+    global _last_expire_at
+    now = datetime.now(tz=UTC)
+    with _expire_lock:
+        if _last_expire_at and now - _last_expire_at < EXPIRE_INTERVAL:
+            return
+        db.expire_inactive()
+        _last_expire_at = now
+
+
 async def cleanup_loop() -> None:
     while True:
         try:
@@ -67,6 +86,8 @@ async def cleanup_loop() -> None:
 async def _startup() -> None:
     db.init_schema()
     db.expire_inactive()
+    global _last_expire_at
+    _last_expire_at = datetime.now(tz=UTC)
     asyncio.create_task(cleanup_loop())
 
 
@@ -90,7 +111,7 @@ def shorten(body: ShortenIn, request: Request) -> ShortenOut:
                 status_code=400, detail="URL invalide (http/https requis)."
             )
 
-    db.expire_inactive()
+    maybe_expire_inactive()
 
     recycled = db.recycle_one_inactive(target_url=url)
     if recycled is not None:
@@ -103,23 +124,23 @@ def shorten(body: ShortenIn, request: Request) -> ShortenOut:
     max_tries = 30
     for _ in range(max_tries):
         code = generate_code(settings.code_length)
-        if db.is_active_code(code):
-            continue
         try:
-            db.reuse_or_insert(code=code, target_url=url)
-            return ShortenOut(
-                code=code,
-                short_url=short_url_for(request, code),
-                inactivity_days=settings.inactivity_days,
-            )
+            created = db.upsert_inactive_or_insert(code=code, target_url=url)
         except Exception:
             continue
+        if not created:
+            continue
+        return ShortenOut(
+            code=code,
+            short_url=short_url_for(request, code),
+            inactivity_days=settings.inactivity_days,
+        )
     raise HTTPException(status_code=503, detail="Impossible de générer un code, réessaie.")
 
 
 @app.get("/{code}")
 def redirect(code: str) -> RedirectResponse:
-    db.expire_inactive()
+    maybe_expire_inactive()
     row = db.get_active(code)
     if row is None:
         raise HTTPException(status_code=404, detail="Lien introuvable ou expiré.")
@@ -130,4 +151,3 @@ def redirect(code: str) -> RedirectResponse:
 
     db.touch(code)
     return RedirectResponse(target, status_code=307)
-

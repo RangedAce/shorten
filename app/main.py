@@ -50,10 +50,6 @@ class NeverExpireIn(BaseModel):
     value: bool
 
 
-class MonetizeIn(BaseModel):
-    value: bool = Field(default=False)
-
-
 class ChangePasswordIn(BaseModel):
     current_password: str
     new_password: str
@@ -176,12 +172,6 @@ def admin_page() -> HTMLResponse:
     return HTMLResponse(tpl.render())
 
 
-@app.get("/cgu", response_class=HTMLResponse)
-def cgu_page() -> HTMLResponse:
-    tpl = jinja.get_template("cgu.html")
-    return HTMLResponse(tpl.render())
-
-
 @app.post("/api/shorten", response_model=ShortenOut)
 def shorten(body: ShortenIn, request: Request) -> ShortenOut:
     raw = body.url.strip()
@@ -287,16 +277,6 @@ def admin_never_expires(
     code: str, body: NeverExpireIn, _: None = Depends(require_admin)
 ) -> dict:
     ok = db.set_never_expires(code, body.value)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Lien introuvable.")
-    return {"updated": True, "value": body.value}
-
-
-@app.post("/admin/api/links/{code}/monetize")
-def admin_monetize(
-    code: str, body: MonetizeIn, _: None = Depends(require_admin)
-) -> dict:
-    ok = db.set_monetize(code, body.value)
     if not ok:
         raise HTTPException(status_code=404, detail="Lien introuvable.")
     return {"updated": True, "value": body.value}

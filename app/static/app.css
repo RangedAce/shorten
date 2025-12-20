@@ -96,56 +96,15 @@ a:hover { text-decoration: underline; }
   color: #ffd3db;
 }
 
-.monetize-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  font-size: 14px;
-  color: var(--muted);
-}
-.monetize-toggle input { accent-color: var(--accent2); }
-
 .footer {
   margin-top: 16px;
   border-top: 1px solid var(--border);
   padding-top: 12px;
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
 }
 .admin-link { color: var(--accent2); font-weight: 600; }
 .admin-link:hover { text-decoration: underline; }
-
-.cookie-banner {
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(720px, 90%);
-  border: 1px solid var(--border);
-  background: rgba(15, 23, 42, 0.95);
-  padding: 14px;
-  border-radius: 14px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-  z-index: 50;
-}
-.cookie-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-.cookie-preferences {
-  margin-top: 12px;
-  display: grid;
-  gap: 6px;
-  padding: 10px;
-  border: 1px dashed var(--border);
-  border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-}
-.cookie-preferences label { display: flex; align-items: center; gap: 8px; color: var(--muted); }
 
 .panel {
   margin-top: 18px;
@@ -219,27 +178,6 @@ button.small {
 button.danger {
   border-color: rgba(251,113,133,0.65);
   color: #ffd3db;
-}
-.ad-slot {
-  margin: 16px 0;
-  display: grid;
-  gap: 10px;
-}
-.ad-placeholder {
-  height: 100px;
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  background: rgba(255,255,255,0.04);
-}
-.countdown {
-  margin: 10px 0 12px;
-  font-weight: 700;
-}
-.primary {
-  width: 100%;
 }
 @media (max-width: 640px) {
   .admin-header, .panel-header {

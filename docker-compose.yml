@@ -13,6 +13,8 @@ services:
       DATABASE_URL: "postgresql://shorten:shorten@db:5432/shorten"
       # INACTIVITY_DAYS: "30"
       # CODE_LENGTH: "6"
+      ADMIN_PASSWORD: "admin"              # à changer lors du premier accès admin
+      ADMIN_SECRET: "change-this-secret"   # token de session admin
     volumes:
       - /opt/docker/shorten/app:/app:ro
     ports:

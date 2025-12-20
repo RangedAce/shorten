@@ -128,27 +128,28 @@ class Database:
                 (now, code),
             )
 
-    def upsert_inactive_or_insert(self, code: str, target_url: str) -> bool:
+    def upsert_inactive_or_insert(self, code: str, target_url: str, monetize: bool) -> bool:
         """Insert le code ou réactive s'il était inactif. Retourne False si le code actif existe déjà."""
         now = utcnow()
         with self.tx() as cur:
             cur.execute(
                 """
-                INSERT INTO links(code, target_url, created_at, last_access_at, active)
-                VALUES(%s, %s, %s, %s, true)
+                INSERT INTO links(code, target_url, created_at, last_access_at, active, monetize)
+                VALUES(%s, %s, %s, %s, true, %s)
                 ON CONFLICT (code) DO UPDATE
                 SET target_url = EXCLUDED.target_url,
                     created_at = EXCLUDED.created_at,
                     last_access_at = EXCLUDED.last_access_at,
-                    active = true
+                    active = true,
+                    monetize = EXCLUDED.monetize
                 WHERE links.active = false
                 RETURNING code;
                 """,
-                (code, target_url, now, now),
+                (code, target_url, now, now, monetize),
             )
             return cur.fetchone() is not None
 
-    def recycle_one_inactive(self, target_url: str) -> Optional[str]:
+    def recycle_one_inactive(self, target_url: str, monetize: bool) -> Optional[str]:
         now = utcnow()
         with self.tx() as cur:
             cur.execute(
@@ -167,10 +168,10 @@ class Database:
             cur.execute(
                 """
                 UPDATE links
-                SET target_url = %s, created_at = %s, last_access_at = %s, active = true
+                SET target_url = %s, created_at = %s, last_access_at = %s, active = true, monetize = %s
                 WHERE code = %s AND active = false
                 """,
-                (target_url, now, now, code),
+                (target_url, now, now, monetize, code),
             )
             if not cur.rowcount:
                 return None

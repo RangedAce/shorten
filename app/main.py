@@ -13,7 +13,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .config import load_settings
 from .db import Database
@@ -33,6 +33,7 @@ jinja = Environment(
 
 class ShortenIn(BaseModel):
     url: str
+    monetize: bool = False
 
 
 class ShortenOut(BaseModel):
@@ -187,7 +188,7 @@ def shorten(body: ShortenIn, request: Request) -> ShortenOut:
 
     maybe_expire_inactive()
 
-    recycled = db.recycle_one_inactive(target_url=url)
+    recycled = db.recycle_one_inactive(target_url=url, monetize=body.monetize)
     if recycled is not None:
         return ShortenOut(
             code=recycled,
@@ -199,7 +200,9 @@ def shorten(body: ShortenIn, request: Request) -> ShortenOut:
     for _ in range(max_tries):
         code = generate_code(settings.code_length)
         try:
-            created = db.upsert_inactive_or_insert(code=code, target_url=url)
+            created = db.upsert_inactive_or_insert(
+                code=code, target_url=url, monetize=body.monetize
+            )
         except Exception:
             continue
         if not created:
@@ -224,6 +227,12 @@ def redirect(code: str) -> RedirectResponse:
         raise HTTPException(status_code=410, detail="Lien invalide.")
 
     db.touch(code)
+    if row.get("monetize"):
+        tpl = jinja.get_template("interstitial.html")
+        return HTMLResponse(
+            tpl.render(target_url=target, code=code, wait_seconds=5),
+            status_code=200,
+        )
     return RedirectResponse(target, status_code=307)
 
 

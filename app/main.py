@@ -6,11 +6,12 @@ import hashlib
 import hmac
 import json
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from threading import Lock
 from urllib.parse import urlparse
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pydantic import BaseModel, Field
@@ -75,6 +76,14 @@ def request_base_url(request: Request) -> str:
 
 def short_url_for(request: Request, code: str) -> str:
     return f"{request_base_url(request)}/{code}"
+
+
+ADS_DEFAULT = "google.com, pub-2136022203013779, DIRECT, f08c47fec0942fa0\n"
+ADS_PATH = Path("ads.txt")
+try:
+    ADS_CONTENT = ADS_PATH.read_text(encoding="utf-8")
+except Exception:
+    ADS_CONTENT = ADS_DEFAULT
 
 
 SESSION_COOKIE = "admin_session"
@@ -180,6 +189,11 @@ def admin_page() -> HTMLResponse:
 def cgu_page() -> HTMLResponse:
     tpl = jinja.get_template("cgu.html")
     return HTMLResponse(tpl.render())
+
+
+@app.get("/ads.txt")
+def ads_txt() -> Response:
+    return Response(ADS_CONTENT or ADS_DEFAULT, media_type="text/plain")
 
 
 @app.post("/api/shorten", response_model=ShortenOut)

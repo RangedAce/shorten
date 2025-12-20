@@ -10,6 +10,8 @@ class Settings:
     database_url: str
     inactivity_days: int
     code_length: int
+    admin_password: str
+    admin_secret: str
 
 
 def load_settings() -> Settings:
@@ -19,9 +21,13 @@ def load_settings() -> Settings:
     )
     inactivity_days = int(os.getenv("INACTIVITY_DAYS", "30"))
     code_length = int(os.getenv("CODE_LENGTH", "6"))
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin")
+    admin_secret = os.getenv("ADMIN_SECRET", "shorten-admin-secret")
     return Settings(
         base_url=base_url,
         database_url=database_url,
         inactivity_days=inactivity_days,
         code_length=code_length,
+        admin_password=admin_password,
+        admin_secret=admin_secret,
     )

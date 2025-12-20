@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirection en cours…</title>
+    <link rel="stylesheet" href="/static/app.css" />
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2136022203013779"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Publicité avant la redirection</h1>
+      <p class="muted">Cette page affiche une courte publicité avant d'accéder à votre lien.</p>
+
+      <div class="ad-slot">
+        <!-- Display -->
+        <ins
+          class="adsbygoogle"
+          style="display:block"
+          data-ad-client="ca-pub-2136022203013779"
+          data-ad-slot="7078718043"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        ></ins>
+        <script>
+          (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+
+        <!-- Multiplex -->
+        <ins
+          class="adsbygoogle"
+          style="display:block"
+          data-ad-format="autorelaxed"
+          data-ad-client="ca-pub-2136022203013779"
+          data-ad-slot="5546801065"
+        ></ins>
+        <script>
+          (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
+
+      <div id="countdown" class="countdown"></div>
+      <button id="continue-btn" class="primary hidden" disabled>Rediriger vers le lien</button>
+    </main>
+
+    <div id="cookie-banner" class="cookie-banner hidden">
+      <p>Ce site utilise des cookies pour l'affichage des publicités et la mesure d'audience.</p>
+      <div class="cookie-actions">
+        <button id="cookie-accept">Accepter</button>
+        <button id="cookie-refuse" class="secondary">Refuser</button>
+        <button id="cookie-settings" class="secondary">Paramétrer</button>
+      </div>
+      <div id="cookie-preferences" class="cookie-preferences hidden">
+        <label><input type="checkbox" id="cookie-ads" checked /> Publicités</label>
+        <label><input type="checkbox" id="cookie-analytics" checked /> Mesure d'audience</label>
+        <button id="cookie-save" class="secondary small">Enregistrer</button>
+      </div>
+    </div>
+
+    <script>
+      window.INTERSTITIAL_CONFIG = {
+        targetUrl: "{{ target_url }}",
+        waitSeconds: {{ wait_seconds }},
+      };
+    </script>
+    <script src="/static/interstitial.js"></script>
+  </body>
+</html>

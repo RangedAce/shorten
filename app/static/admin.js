@@ -86,6 +86,7 @@ function renderLinks(links) {
       <td>${formatDate(link.created_at)}</td>
       <td>${formatDate(link.last_access_at)}</td>
       <td>${link.click_count ?? 0}</td>
+      <td>${link.monetize ? "Oui" : "Non"}</td>
       <td>${renderStatus(link)}</td>
       <td class="actions"></td>
     `;
@@ -95,12 +96,17 @@ function renderLinks(links) {
     toggleBtn.textContent = link.never_expires ? "Rendre expirables" : "Ne jamais expirer";
     toggleBtn.onclick = () => toggleNeverExpires(link.code, !link.never_expires);
 
+    const monetizeBtn = document.createElement("button");
+    monetizeBtn.className = link.monetize ? "secondary small" : "primary small";
+    monetizeBtn.textContent = link.monetize ? "Désactiver pub" : "Activer pub";
+    monetizeBtn.onclick = () => toggleMonetize(link.code, !link.monetize);
+
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "secondary small danger";
     deleteBtn.textContent = "Supprimer";
     deleteBtn.onclick = () => deleteLink(link.code);
 
-    actionsCell.append(toggleBtn, deleteBtn);
+    actionsCell.append(toggleBtn, monetizeBtn, deleteBtn);
     linksTableBody.appendChild(row);
   }
 }
@@ -148,6 +154,25 @@ async function deleteLink(code) {
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       showError(data?.detail || "Impossible de supprimer le lien.");
+      return;
+    }
+    await loadLinks();
+  } catch {
+    showError("Erreur réseau.");
+  }
+}
+
+async function toggleMonetize(code, value) {
+  clearError();
+  try {
+    const res = await fetch(`/admin/api/links/${code}/monetize`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      showError(data?.detail || "Impossible de mettre à jour la monétisation.");
       return;
     }
     await loadLinks();

@@ -53,7 +53,8 @@ class Database:
                   last_access_at TIMESTAMPTZ NOT NULL,
                   active BOOLEAN NOT NULL,
                   click_count INTEGER NOT NULL DEFAULT 0,
-                  never_expires BOOLEAN NOT NULL DEFAULT false
+                  never_expires BOOLEAN NOT NULL DEFAULT false,
+                  monetize BOOLEAN NOT NULL DEFAULT false
                 );
                 """
             )
@@ -71,6 +72,12 @@ class Database:
                 """
                 ALTER TABLE links
                 ADD COLUMN IF NOT EXISTS never_expires BOOLEAN NOT NULL DEFAULT false;
+                """
+            )
+            cur.execute(
+                """
+                ALTER TABLE links
+                ADD COLUMN IF NOT EXISTS monetize BOOLEAN NOT NULL DEFAULT false;
                 """
             )
 
@@ -181,7 +188,7 @@ class Database:
         with self.ro_cursor() as cur:
             cur.execute(
                 """
-                SELECT code, target_url, created_at, last_access_at, active, click_count, never_expires
+                SELECT code, target_url, created_at, last_access_at, active, click_count, never_expires, monetize
                 FROM links
                 ORDER BY created_at DESC
                 """
@@ -197,6 +204,14 @@ class Database:
         with self.tx() as cur:
             cur.execute(
                 "UPDATE links SET never_expires = %s WHERE code = %s",
+                (value, code),
+            )
+            return bool(cur.rowcount)
+
+    def set_monetize(self, code: str, value: bool) -> bool:
+        with self.tx() as cur:
+            cur.execute(
+                "UPDATE links SET monetize = %s WHERE code = %s",
                 (value, code),
             )
             return bool(cur.rowcount)

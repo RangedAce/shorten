@@ -63,6 +63,7 @@ function startCountdown() {
   function tick() {
     countdownEl.textContent = `Redirection possible dans ${remaining} seconde(s)...`;
     if (remaining <= 0) {
+      btn.classList.remove("hidden");
       btn.disabled = false;
       countdownEl.textContent = "Vous pouvez continuer.";
     } else {

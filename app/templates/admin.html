@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin · shorten</title>
+    <meta name="google-adsense-account" content="ca-pub-2136022203013779" />
+    <link rel="stylesheet" href="/static/app.css" />
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2136022203013779"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <main class="card">
+      <div class="admin-header">
+        <div>
+          <p class="overline">Espace admin</p>
+          <h1>Suivi des raccourcis</h1>
+          <p class="muted">
+            Connecte-toi avec le mot de passe admin (défini dans <code>docker-compose.yml</code>), puis change-le au premier accès.
+          </p>
+        </div>
+        <a class="secondary" href="/">Retour</a>
+      </div>
+
+      <section id="login-section" class="panel">
+        <h2>Connexion</h2>
+        <form id="login-form" class="form inline-form">
+          <input id="admin-password" name="password" type="password" placeholder="Mot de passe admin" required />
+          <button type="submit">Se connecter</button>
+        </form>
+        <p class="muted small">
+          Mot de passe initial : variable <code>ADMIN_PASSWORD</code> (docker-compose), modifiable ci-dessous après connexion.
+        </p>
+      </section>
+
+      <section id="dashboard" class="panel hidden">
+        <div class="panel-header">
+          <div>
+            <h2>Liens créés</h2>
+            <p class="muted small">Stats de clics, expiration, suppression forcée, monétisation (bouton dans la colonne Actions).</p>
+          </div>
+          <div class="admin-actions">
+            <button id="refresh-btn" class="secondary" type="button">Actualiser</button>
+          </div>
+        </div>
+
+        <div id="stats" class="stats"></div>
+        <div id="admin-error" class="error hidden"></div>
+
+        <div class="table-wrapper">
+          <table id="links-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>URL cible</th>
+                <th>Créé</th>
+                <th>Dernier accès</th>
+                <th>Clics</th>
+                <th>Monétisation</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="password-section" class="panel hidden">
+        <h2>Changer le mot de passe admin</h2>
+        <form id="password-form" class="form inline-form">
+          <input id="current-password" type="password" placeholder="Mot de passe actuel" required />
+          <input id="new-password" type="password" placeholder="Nouveau mot de passe (6+ caractères)" required />
+          <button type="submit" class="secondary">Mettre à jour</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="/static/admin.js"></script>
+  </body>
+</html>

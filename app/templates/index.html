@@ -4,7 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>s.rangedace.fr – Raccourcisseur d'URL</title>
+    <meta name="google-adsense-account" content="ca-pub-2136022203013779" />
     <link rel="stylesheet" href="/static/app.css" />
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2136022203013779"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
     <main class="card">
@@ -21,6 +27,10 @@
           required
           autocomplete="off"
         />
+        <label class="monetize-toggle emphasize">
+          <input id="monetize-checkbox" type="checkbox" />
+          <span>Monétiser ce lien (affiche 5s de pub avant la redirection)</span>
+        </label>
         <button id="shorten-btn" type="submit">Raccourcir l'URL</button>
       </form>
 
@@ -36,9 +46,27 @@
       </section>
 
       <section id="error" class="error hidden"></section>
+
+      <div class="footer">
+        <a class="admin-link" href="/admin">Accéder à l'admin</a>
+        <a class="admin-link" href="/cgu">CGU</a>
+      </div>
     </main>
+
+    <div id="cookie-banner" class="cookie-banner hidden">
+      <p>Ce site utilise des cookies pour l'affichage des publicités et la mesure d'audience.</p>
+      <div class="cookie-actions">
+        <button id="cookie-accept">Accepter</button>
+        <button id="cookie-refuse" class="secondary">Refuser</button>
+        <button id="cookie-settings" class="secondary">Paramétrer</button>
+      </div>
+      <div id="cookie-preferences" class="cookie-preferences hidden">
+        <label><input type="checkbox" id="cookie-ads" checked /> Publicités</label>
+        <label><input type="checkbox" id="cookie-analytics" checked /> Mesure d'audience</label>
+        <button id="cookie-save" class="secondary small">Enregistrer</button>
+      </div>
+    </div>
 
     <script src="/static/app.js"></script>
   </body>
 </html>
-
